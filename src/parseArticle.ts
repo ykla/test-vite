@@ -1,7 +1,11 @@
 import { readFile, stat } from "fs/promises";
 import matter from "gray-matter";
 import { cache, visitedCache } from "./index";
-import { getTargetOptionValue, getTimestamp } from "./utils";
+import {
+  getTargetOptionValue,
+  getTimestamp,
+  normalizeRoutePrefix,
+} from "./utils";
 import { join, normalize, resolve, sep } from "path";
 import type {
   Frontmatter,
@@ -41,6 +45,7 @@ export async function serializationPaths(
 
     for (const name of pathParts) {
       currentPath = join(currentPath, name);
+      const normalizedCurrentPath = normalize(currentPath);
       // 拼接 srcDir 得到实际文件路径
       const realPath = resolve(srcDir, currentPath);
 
@@ -103,11 +108,14 @@ export async function serializationPaths(
           index: 0, // 占位，后续再实际赋值
           name,
           isFolder,
+          path: normalizedCurrentPath,
           options,
           frontmatter,
           children: [],
         };
         currentNode.push(childNode);
+      } else if (!childNode.path) {
+        childNode.path = normalizedCurrentPath;
       }
 
       currentNode = childNode.children;
@@ -183,11 +191,15 @@ export function defaultCompareFn(
 }
 
 /** 生成 nav 数据 */
-export function generateNav(structuredData: Item[]) {
+export function generateNav(structuredData: Item[], prefix = "") {
+  const normalizedPrefix = normalizeRoutePrefix(prefix);
+  const basePath = normalizedPrefix.replace(/\/$/, "");
+  const activePrefix = normalizedPrefix || "/";
+
   return structuredData.map((item) => ({
     text: item.options.title || item.name,
-    activeMatch: `/${item.name}/`,
-    link: getFirstArticleFromFolder(item),
+    activeMatch: `${activePrefix}${item.name}/`,
+    link: getFirstArticleFromFolder(item, basePath),
   }));
 }
 
@@ -208,12 +220,11 @@ export function generateSidebar(
   options: Options
 ): DefaultTheme.Sidebar {
   const { indexAsFolderLink = true, frontmatterPrefix = "" } = options;
+  const normalizedPrefix = normalizeRoutePrefix(options.prefix);
   const sidebar: DefaultTheme.Sidebar = {};
 
-  // 遍历首层目录（nav），递归生成对应的 sidebar
-  for (const { name, children } of structuredData) {
-    sidebar[`/${name}/`] = traverseSubFile(children, `/${name}`).sidebarMulti;
-  }
+  const normalizeLinkPath = (value: string) =>
+    value.replace(/\\+/g, "/").replace(/\/+/g, "/");
 
   function traverseSubFile(
     subData: Item[],
@@ -228,9 +239,10 @@ export function generateSidebar(
       const filePath = isIndex
         ? `${parentPath}/`
         : `${parentPath}/${file.name}`;
+      const normalizedFilePath = normalizeLinkPath(filePath);
 
       if (indexAsFolderLink && isIndex) {
-        link = filePath;
+        link = normalizedFilePath;
         return p;
       }
 
@@ -250,7 +262,7 @@ export function generateSidebar(
           file.frontmatter.h1) ||
         file.name.replace(".md", "");
       if (file.isFolder) {
-        const result = traverseSubFile(file.children, filePath);
+        const result = traverseSubFile(file.children, normalizedFilePath);
         p.push({
           text: fileName,
           collapsed: file.options.collapsed ?? false,
@@ -258,12 +270,30 @@ export function generateSidebar(
           link: result.link,
         });
       } else {
-        p.push({ text: fileName, link: filePath.replace(".md", "") });
+        p.push({
+          text: fileName,
+          link: normalizedFilePath.replace(".md", ""),
+        });
       }
       return p;
     }, [] as DefaultTheme.SidebarItem[]);
 
     return { sidebarMulti, link };
+  }
+
+  if (normalizedPrefix) {
+    const parentPath = normalizedPrefix.replace(/\/$/, "");
+    sidebar[normalizedPrefix] = traverseSubFile(
+      structuredData,
+      parentPath
+    ).sidebarMulti;
+    return sidebar;
+  }
+
+  // 遍历首层目录（nav），递归生成对应的 sidebar
+  for (const { name, children, isFolder } of structuredData) {
+    if (!isFolder) continue;
+    sidebar[`/${name}/`] = traverseSubFile(children, `/${name}`).sidebarMulti;
   }
 
   return sidebar;

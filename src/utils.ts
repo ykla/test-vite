@@ -120,6 +120,26 @@ export function getTargetOptionValue(
   return frontmatter[k] ?? (options as any)[k];
 }
 
+/** 规范化路由前缀（确保以 / 开头，以 / 结尾，去除多余分隔符） */
+export function normalizeRoutePrefix(prefix?: string): string {
+  if (!prefix) return "";
+  let value = prefix.trim();
+  if (!value) return "";
+  value = value.replace(/\\+/g, "/");
+  if (!value.startsWith("/")) value = `/${value}`;
+  value = value.replace(/\/+/g, "/");
+  if (!value.endsWith("/")) value = `${value}/`;
+  return value;
+}
+
+/** 在已有路径前追加路由前缀 */
+export function withRoutePrefix(prefix: string, link: string): string {
+  if (!prefix) return link;
+  const normalizedLink = link.replace(/^\/+/, "");
+  const combined = `${prefix}${normalizedLink}`;
+  return combined.startsWith("/") ? combined : `/${combined}`;
+}
+
 /** 获取文件夹内子文件、文件夹最小和最大的 git 时间戳 */
 export function getFolderCommitTimes(children: Item[]): {
   minFirstCommitTime?: number;
