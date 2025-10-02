@@ -48,6 +48,50 @@ export default defineConfig({
 
 Please refer to the TypeScript type hints
 
+### `prefix`
+
+When you need to host multiple documentation projects within the same VitePress build, you can give each plugin instance its own route prefix. The option is entirely optional—if you omit `prefix`, AutoNav leaves all generated links as-is so the instance mounts on the default `/` routes.
+
+```ts
+AutoNav({
+  srcDir: "docs",
+  summary: {
+    target: "docs/FreeBSD-Ask/SUMMARY.md",
+    collapsed: false,
+  },
+  prefix: "/FreeBSD-Ask/",
+});
+```
+
+Each instance will generate navigation data that is automatically mounted under the configured `prefix`, so you can declare multiple instances—one per documentation folder—to provide independent sidebars such as `/FreeBSD-Ask/`, `/Handbook/`, and so on.
+
+```ts
+export default defineConfig({
+  vite: {
+    plugins: [
+      AutoNav({
+        srcDir: "docs",
+        summary: {
+          target: "docs/1/SUMMARY.md",
+          collapsed: false,
+        },
+        prefix: "/1/",
+      }),
+      AutoNav({
+        srcDir: "docs",
+        summary: {
+          target: "docs/2/SUMMARY.md",
+          collapsed: false,
+        },
+        prefix: "/2/",
+      }),
+    ],
+  },
+});
+```
+
+In the example above, the plugin mounts the generated navigation from `docs/1` under `/1/` and `docs/2` under `/2/`, letting each documentation section ship with its own sidebar inside the same VitePress project.
+
 ## License
 
 [MIT](./LICENSE) License © 2023 [Xaviw](https://github.com/Xaviw)

@@ -46,6 +46,50 @@ export default defineConfig({
 
 请参照 TypeScript 类型提示
 
+### `prefix`
+
+当你需要在同一个 VitePress 项目中托管多个文档子站点时，可以为每个插件实例指定独立的路由前缀。`prefix` 是可选项——如果不配置，它会保持生成的链接不变，实例将默认挂载在根路径 `/`。
+
+```ts
+AutoNav({
+  srcDir: "docs",
+  summary: {
+    target: "docs/FreeBSD-Ask/SUMMARY.md",
+    collapsed: false,
+  },
+  prefix: "/FreeBSD-Ask/",
+});
+```
+
+分别为不同目录声明插件实例并配置对应的 `prefix`，即可将生成的导航和侧边栏挂载到 `/FreeBSD-Ask/`、`/Handbook/` 等独立的路径前缀下。
+
+```ts
+export default defineConfig({
+  vite: {
+    plugins: [
+      AutoNav({
+        srcDir: "docs",
+        summary: {
+          target: "docs/1/SUMMARY.md",
+          collapsed: false,
+        },
+        prefix: "/1/",
+      }),
+      AutoNav({
+        srcDir: "docs",
+        summary: {
+          target: "docs/2/SUMMARY.md",
+          collapsed: false,
+        },
+        prefix: "/2/",
+      }),
+    ],
+  },
+});
+```
+
+上述示例会将 `docs/1` 目录生成的导航挂载到 `/1/`，同时把 `docs/2` 的导航挂载到 `/2/`，从而在同一个 VitePress 项目中提供多个拥有独立侧边栏的文档子站点。
+
 ## License
 
 [MIT](./LICENSE) License © 2023 [Xaviw](https://github.com/Xaviw)

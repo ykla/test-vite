@@ -2,12 +2,15 @@ import { readFile } from "fs/promises";
 import { normalize } from "path";
 import type { Options } from "../types";
 import type { DefaultTheme } from "vitepress";
+import { normalizeRoutePrefix, withRoutePrefix } from "./utils";
 
 /** summary 处理逻辑 */
 export default async function parseSummary(
-  options: NonNullable<Options["summary"]>
+  options: NonNullable<Options["summary"]>,
+  prefix = ""
 ) {
   const { target, collapsed, removeEscape = true } = options;
+  const normalizedPrefix = normalizeRoutePrefix(prefix);
   // 读取文件
   const file = await readFile(normalize(target), { encoding: "utf-8" });
   const lines = file.split(/\r?\n/).filter((item) => item.trim());
@@ -84,6 +87,24 @@ export default async function parseSummary(
         if (nav.length && !nav[nav.length - 1].link) {
           nav[nav.length - 1].link = link;
         }
+      }
+    }
+  }
+
+  if (normalizedPrefix) {
+    const appendPrefix = (items?: DefaultTheme.SidebarItem[]) => {
+      if (!items) return;
+      for (const item of items) {
+        if (item.link) {
+          item.link = withRoutePrefix(normalizedPrefix, item.link);
+        }
+        appendPrefix(item.items);
+      }
+    };
+    appendPrefix(sidebar as DefaultTheme.SidebarItem[]);
+    for (const item of nav) {
+      if (item.link) {
+        item.link = withRoutePrefix(normalizedPrefix, item.link);
       }
     }
   }

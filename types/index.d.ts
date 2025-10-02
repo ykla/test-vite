@@ -21,6 +21,12 @@ export interface Options {
    */
   indexAsFolderLink?: boolean;
   /**
+   * 为生成的导航和侧边栏设置路由前缀，便于在同一个 VitePress 项目中挂载多个独立的文档目录
+   *
+   * 不配置时保持原始链接路径（默认等同于根路径 `/`）
+   */
+  prefix?: string;
+  /**
    * 对特定文件或文件夹进行配置
    *
    * 键名为文件名、文件夹名或路径（以 [srcDir] 为根目录，从外层文件夹往里进行查找，md 扩展名可以省略；文件名重复时，增加前导路径区分）
@@ -99,6 +105,8 @@ export interface Item {
   name: string;
   /** 是否是文件夹 */
   isFolder: boolean;
+  /** 文件或文件夹相对 [srcDir] 的路径 */
+  path: string;
   /** 配置对象(不包括frontmatter)，以及时间戳数据(TimesInfo) */
   options: ItemCacheOptions;
   /** frontmatter 数据以及文章一级标题（h1） */

@@ -4,7 +4,12 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 import glob from "fast-glob";
 import matter from "gray-matter";
 import parseSummary from "./parseSummary";
-import { throttle, forceReload, updateCommitTimes } from "./utils";
+import {
+  throttle,
+  forceReload,
+  updateCommitTimes,
+  normalizeRoutePrefix,
+} from "./utils";
 import {
   generateNav,
   generateSidebar,
@@ -20,6 +25,7 @@ import type {
   Options,
   UserConfig,
 } from "../types";
+import type { DefaultTheme } from "vitepress";
 
 // 缓存数据，减少读取 git 时间戳和读取文件内容的次数
 export let cache: Record<
@@ -71,15 +77,46 @@ export default function AutoNav(options: Options = {}): Plugin {
           cacheDir,
         },
       } = config as unknown as UserConfig;
+      const siteThemeConfig =
+        (config as unknown as UserConfig).vitepress.site.themeConfig;
+
+      const normalizedPrefix = normalizeRoutePrefix(options.prefix);
+      const normalizedOptions: Options = {
+        ...options,
+        prefix: normalizedPrefix || undefined,
+      };
+
+      const mergeSidebar = (
+        current: DefaultTheme.Sidebar | undefined,
+        next: DefaultTheme.Sidebar
+      ): DefaultTheme.Sidebar => {
+        if (!current) return next;
+        if (Array.isArray(current) || Array.isArray(next)) {
+          return next;
+        }
+        return {
+          ...(current as Record<string, DefaultTheme.SidebarItem[]>),
+          ...(next as Record<string, DefaultTheme.SidebarItem[]>),
+        };
+      };
 
       if (options.summary) {
         console.log("🎈 SUMMARY 解析中...");
-        const { sidebar, nav: _nav } = await parseSummary(options.summary);
-        (config as unknown as UserConfig).vitepress.site.themeConfig.sidebar =
-          sidebar;
+        const { sidebar, nav: _nav } = await parseSummary(
+          options.summary,
+          normalizedPrefix
+        );
+        const sidebarValue: DefaultTheme.Sidebar = normalizedPrefix
+          ? {
+              [normalizedPrefix]: sidebar as DefaultTheme.SidebarItem[],
+            }
+          : sidebar;
+        siteThemeConfig.sidebar = mergeSidebar(
+          siteThemeConfig.sidebar as DefaultTheme.Sidebar | undefined,
+          sidebarValue
+        );
         if (!nav) {
-          (config as unknown as UserConfig).vitepress.site.themeConfig.nav =
-            _nav;
+          siteThemeConfig.nav = _nav;
         }
         console.log("🎈 SUMMARY 解析完成...");
         return config;
@@ -117,7 +154,7 @@ export default function AutoNav(options: Options = {}): Plugin {
       ).map((path) => normalize(path));
 
       // 处理文件路径数组为多级结构化数据
-      let data = await serializationPaths(paths, options, srcDir);
+      let data = await serializationPaths(paths, normalizedOptions, srcDir);
 
       // 处理文件夹 git 时间戳
       updateCommitTimes(data);
@@ -127,14 +164,15 @@ export default function AutoNav(options: Options = {}): Plugin {
 
       // vitepress 中没有配置 nav 时自动生成。因为 nav 数据项较少，可以用手动配置代替在插件中处理
       if (!nav) {
-        (config as unknown as UserConfig).vitepress.site.themeConfig.nav =
-          generateNav(data);
+        siteThemeConfig.nav = generateNav(data, normalizedPrefix);
       }
 
       // 生成侧边栏目录
-      const sidebar = generateSidebar(data, options);
-      (config as unknown as UserConfig).vitepress.site.themeConfig.sidebar =
-        sidebar;
+      const sidebar = generateSidebar(data, normalizedOptions);
+      siteThemeConfig.sidebar = mergeSidebar(
+        siteThemeConfig.sidebar as DefaultTheme.Sidebar | undefined,
+        sidebar
+      );
 
       // 删除不再需要的缓存后，写入缓存到本地 vitepress cache 目录
       for (let key in cache) {
