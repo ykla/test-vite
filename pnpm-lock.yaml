@@ -16,7 +16,7 @@ importers:
         version: 4.0.3
       vite:
         specifier: '>=4.0.0'
-        version: 7.1.8(@types/node@20.5.9)(terser@5.31.1)
+        version: 7.1.11(@types/node@20.5.9)(terser@5.31.1)
       vitepress:
         specifier: '>=1.0.0'
         version: 1.0.0(@algolia/client-search@4.24.0)(@types/node@20.5.9)(postcss@8.5.6)(search-insights@2.14.0)(terser@5.31.1)(typescript@5.2.2)
@@ -1120,8 +1120,8 @@ packages:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
 
-  vite@5.4.20:
-    resolution: {integrity: sha512-j3lYzGC3P+B5Yfy/pfKNgVEg4+UtcIJcVRt2cDjIOmhLourAqPqf8P7acgxeiSgUB7E3p2P8/3gNIgDLpwzs4g==}
+  vite@5.4.21:
+    resolution: {integrity: sha512-o5a9xKjbtuhY6Bi5S3+HvbRERmouabWbyUcpXXUA1u+GNUKoROi9byOJ8M0nHbHYHkYICiMlqxkg1KkYmm25Sw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -1151,8 +1151,8 @@ packages:
       terser:
         optional: true
 
-  vite@7.1.8:
-    resolution: {integrity: sha512-oBXvfSHEOL8jF+R9Am7h59Up07kVVGH1NrFGFoEG6bPDZP3tGpQhvkBpy5x7U6+E6wZCu9OihsWgJqDbQIm8LQ==}
+  vite@7.1.11:
+    resolution: {integrity: sha512-uzcxnSDVjAopEUjljkWh8EIrg6tlzrjFUfMcR1EVsRDGwf/ccef0qQPRyOrROwhrTDaApueq+ja+KLPlzR/zdg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1678,9 +1678,9 @@ snapshots:
 
   '@types/web-bluetooth@0.0.20': {}
 
-  '@vitejs/plugin-vue@5.0.5(vite@5.4.20(@types/node@20.5.9)(terser@5.31.1))(vue@3.4.31(typescript@5.2.2))':
+  '@vitejs/plugin-vue@5.0.5(vite@5.4.21(@types/node@20.5.9)(terser@5.31.1))(vue@3.4.31(typescript@5.2.2))':
     dependencies:
-      vite: 5.4.20(@types/node@20.5.9)(terser@5.31.1)
+      vite: 5.4.21(@types/node@20.5.9)(terser@5.31.1)
       vue: 3.4.31(typescript@5.2.2)
 
   '@vue/compiler-core@3.4.31':
@@ -2190,7 +2190,7 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  vite@5.4.20(@types/node@20.5.9)(terser@5.31.1):
+  vite@5.4.21(@types/node@20.5.9)(terser@5.31.1):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.6
@@ -2200,7 +2200,7 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.31.1
 
-  vite@7.1.8(@types/node@20.5.9)(terser@5.31.1):
+  vite@7.1.11(@types/node@20.5.9)(terser@5.31.1):
     dependencies:
       esbuild: 0.25.10
       fdir: 6.5.0(picomatch@4.0.3)
@@ -2220,7 +2220,7 @@ snapshots:
       '@shikijs/core': 1.10.3
       '@shikijs/transformers': 1.10.3
       '@types/markdown-it': 13.0.8
-      '@vitejs/plugin-vue': 5.0.5(vite@5.4.20(@types/node@20.5.9)(terser@5.31.1))(vue@3.4.31(typescript@5.2.2))
+      '@vitejs/plugin-vue': 5.0.5(vite@5.4.21(@types/node@20.5.9)(terser@5.31.1))(vue@3.4.31(typescript@5.2.2))
       '@vue/devtools-api': 7.3.5
       '@vueuse/core': 10.11.0(vue@3.4.31(typescript@5.2.2))
       '@vueuse/integrations': 10.11.0(focus-trap@7.5.4)(vue@3.4.31(typescript@5.2.2))
@@ -2228,7 +2228,7 @@ snapshots:
       mark.js: 8.11.1
       minisearch: 6.3.0
       shiki: 1.10.3
-      vite: 5.4.20(@types/node@20.5.9)(terser@5.31.1)
+      vite: 5.4.21(@types/node@20.5.9)(terser@5.31.1)
       vue: 3.4.31(typescript@5.2.2)
     optionalDependencies:
       postcss: 8.5.6
